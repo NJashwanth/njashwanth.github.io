@@ -75,6 +75,59 @@ body {
   gap: 18px;
 }
 
+.tech-selector-wrap {
+  padding: 0 0 12px;
+}
+
+.tech-selector-label {
+  margin: 0;
+  color: var(--meta);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.tech-selector {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tech-tab {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  padding: 6px 12px;
+  font-family: "Work Sans", "Segoe UI", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tech-tab:hover {
+  border-color: var(--accent);
+}
+
+.tech-tab.is-active {
+  background: var(--accent);
+  color: var(--on-accent);
+  border-color: var(--accent);
+}
+
+.tech-status {
+  margin: 9px 0 0;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px dashed var(--chip-line);
+  background: color-mix(in srgb, var(--accent-soft) 42%, var(--surface));
+  color: var(--chip-ink);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
 .theme-toggle {
   margin-left: auto;
   padding: 8px 12px;
@@ -340,6 +393,18 @@ body[data-theme="dark"] #skills .chips span {
 
   .theme-toggle {
     margin-left: 0;
+  }
+
+  .tech-selector-wrap {
+    padding-bottom: 10px;
+  }
+
+  .tech-selector-label {
+    font-size: 0.78rem;
+  }
+
+  .tech-tab {
+    width: fit-content;
   }
 
   .hero {

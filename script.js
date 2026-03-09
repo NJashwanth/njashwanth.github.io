@@ -1,5 +1,7 @@
 const themeToggle = document.getElementById('theme-toggle');
 const savedTheme = localStorage.getItem('site-theme');
+const techTabs = document.querySelectorAll('.tech-tab');
+const techStatus = document.getElementById('tech-status');
 
 if (savedTheme) {
   document.body.setAttribute('data-theme', savedTheme);
@@ -40,3 +42,31 @@ revealNodes.forEach((node, index) => {
 
 document.getElementById('year').textContent = new Date().getFullYear();
 updateThemeLabel();
+
+const upcomingTechMessage = {
+  flutter: 'Flutter version is in progress. Coming soon.',
+  react: 'React version is in progress. Coming soon.',
+  angular: 'Angular version is in progress. Coming soon.'
+};
+
+techTabs.forEach((tab) => {
+  tab.addEventListener('click', () => {
+    techTabs.forEach((node) => {
+      node.classList.remove('is-active');
+      node.setAttribute('aria-pressed', 'false');
+    });
+
+    tab.classList.add('is-active');
+    tab.setAttribute('aria-pressed', 'true');
+
+    const selectedTech = tab.dataset.tech;
+    if (selectedTech === 'html') {
+      techStatus.hidden = true;
+      techStatus.textContent = '';
+      return;
+    }
+
+    techStatus.textContent = upcomingTechMessage[selectedTech] || 'This version is in progress. Coming soon.';
+    techStatus.hidden = false;
+  });
+});
