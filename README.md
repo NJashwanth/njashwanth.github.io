@@ -1,4 +1,4 @@
-# jashwanth-portfolio
+# Jashwanth Neela Portfolio
 
 This repository contains my personal website.
 
