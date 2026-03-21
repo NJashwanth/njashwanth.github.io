@@ -49,6 +49,9 @@ const upcomingTechMessage = {
   angular: 'Angular version is in progress. Coming soon.'
 };
 
+const mainContent = document.getElementById('main-content');
+const originalMainContent = mainContent ? mainContent.innerHTML : '';
+
 techTabs.forEach((tab) => {
   tab.addEventListener('click', () => {
     techTabs.forEach((node) => {
@@ -63,10 +66,14 @@ techTabs.forEach((tab) => {
     if (selectedTech === 'html') {
       techStatus.hidden = true;
       techStatus.textContent = '';
+      if (mainContent) mainContent.innerHTML = originalMainContent;
       return;
     }
 
-    techStatus.textContent = upcomingTechMessage[selectedTech] || 'This version is in progress. Coming soon.';
-    techStatus.hidden = false;
+    techStatus.textContent = '';
+    techStatus.hidden = true;
+      if (mainContent) {
+        mainContent.innerHTML = `<div class="container section tech-placeholder"><h2>${selectedTech.charAt(0).toUpperCase() + selectedTech.slice(1)} Version</h2><p>${upcomingTechMessage[selectedTech] || 'This version is in progress. Coming soon.'}</p></div>`;
+    }
   });
 });
