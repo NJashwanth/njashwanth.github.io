@@ -31,6 +31,13 @@
 
   <title>portfolio_flutter</title>
   <link rel="manifest" href="manifest.json">
+  <style>
+    html[data-theme="dark"],
+    html[data-theme="dark"] body {
+      background: #181d1f;
+      color: #e6ece9;
+    }
+  </style>
 </head>
 <body>
   <!--
@@ -44,6 +51,28 @@
   <script src="flutter_bootstrap.js" async></script>
 
   <script>
+  const applyTheme = (theme) => {
+    const nextTheme = theme === "dark" ? "dark" : "light";
+    document.documentElement.setAttribute("data-theme", nextTheme);
+    document.body.setAttribute("data-theme", nextTheme);
+    document.documentElement.classList.toggle("dark", nextTheme === "dark");
+  };
+
+  window.addEventListener("message", (event) => {
+    if (typeof event.data === "string" && event.data.startsWith("theme:")) {
+      applyTheme(event.data.replace("theme:", ""));
+    }
+  });
+
+  try {
+    if (window.parent && window.parent !== window && window.parent.document) {
+      const parentTheme = window.parent.document.body.getAttribute("data-theme");
+      applyTheme(parentTheme || "light");
+    }
+  } catch (_err) {
+    applyTheme("light");
+  }
+
   window.getParentTheme = () => {
     return document.documentElement.classList.contains("dark")
       ? "dark"

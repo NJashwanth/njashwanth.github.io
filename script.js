@@ -19,14 +19,11 @@ themeToggle.addEventListener('click', () => {
   document.body.setAttribute('data-theme', nextTheme);
   localStorage.setItem('site-theme', nextTheme);
   updateThemeLabel();
-  // Notify Flutter iframe of theme change
-  const flutterIframe = document.querySelector('#main-content iframe');
-  if (flutterIframe) {
-    flutterIframe.contentWindow.postMessage('theme:' + nextTheme, '*');
+  const activeIframe = document.querySelector('#main-content iframe');
+  if (activeIframe) {
+    activeIframe.contentWindow.postMessage('theme:' + nextTheme, '*');
   }
 });
-
-const revealNodes = document.querySelectorAll('.reveal');
 
 const revealObserver = new IntersectionObserver(
   (entries, observer) => {
@@ -40,23 +37,19 @@ const revealObserver = new IntersectionObserver(
   { threshold: 0.2 }
 );
 
-revealNodes.forEach((node, index) => {
-  node.style.transitionDelay = `${index * 70}ms`;
-  revealObserver.observe(node);
-});
+function setupRevealAnimations() {
+  document.querySelectorAll('#main-content .reveal').forEach((node, index) => {
+    node.style.transitionDelay = `${index * 70}ms`;
+    revealObserver.observe(node);
+  });
+}
+
+setupRevealAnimations();
 
 document.getElementById('year').textContent = new Date().getFullYear();
 updateThemeLabel();
 
-const upcomingTechMessage = {
-  flutter: 'Flutter version is in progress. Coming soon.',
-  react: 'React version is in progress. Coming soon.',
-  angular: 'Angular version is in progress. Coming soon.'
-};
 
-
-const mainContent = document.getElementById('main-content');
-// Store a static copy of the original HTML at page load
 let staticOriginalMainContent = '';
 document.addEventListener('DOMContentLoaded', () => {
   const mc = document.getElementById('main-content');
@@ -68,12 +61,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function restoreOriginalMainContent() {
   const mc = document.getElementById('main-content');
-  // If the data attribute is missing, restore from the static copy
   if (mc && !mc.dataset.originalHtml && staticOriginalMainContent) {
     mc.dataset.originalHtml = staticOriginalMainContent;
   }
   if (mc && mc.dataset.originalHtml) {
     mc.innerHTML = mc.dataset.originalHtml;
+    setupRevealAnimations();
   }
 }
 
@@ -89,36 +82,19 @@ techTabs.forEach((tab) => {
 
     const selectedTech = tab.dataset.tech;
 
-
-    // Diagnostic logging
-    console.log('Tab clicked:', selectedTech);
-
-
-
-
-    // Always restore original content for HTML
     if (selectedTech === 'html') {
-      console.log('Restoring original main content');
       techStatus.hidden = true;
       techStatus.textContent = '';
-      // If the data attribute is missing (e.g., after React/Angular placeholder), re-initialize it from the current content
-      const mc = document.getElementById('main-content');
-      if (mc && !mc.dataset.originalHtml) {
-        mc.dataset.originalHtml = mc.innerHTML;
-      }
       restoreOriginalMainContent();
       return;
     }
 
 
-    // Only show iframe for Flutter
     if (selectedTech === 'flutter') {
-      console.log('Embedding Flutter iframe');
       techStatus.hidden = true;
       techStatus.textContent = '';
       const mc = document.getElementById('main-content');
       if (mc) {
-        // If original HTML is missing (e.g., after iframe replacement), re-initialize it
         if (!mc.dataset.originalHtml) {
           mc.dataset.originalHtml = mc.innerHTML;
         }
@@ -135,16 +111,31 @@ techTabs.forEach((tab) => {
       return;
     }
 
-    // Show placeholder for React/Angular
+    // React and Angular are better viewed full-page instead of nested in an iframe.
     techStatus.textContent = '';
     techStatus.hidden = true;
     const mc = document.getElementById('main-content');
     if (mc) {
-      // If original HTML is missing (e.g., after iframe replacement), re-initialize it
       if (!mc.dataset.originalHtml) {
         mc.dataset.originalHtml = mc.innerHTML;
       }
-      mc.innerHTML = `<div class="container section tech-placeholder"><h2>${selectedTech.charAt(0).toUpperCase() + selectedTech.slice(1)} Version</h2><p>${upcomingTechMessage[selectedTech] || 'This version is in progress. Coming soon.'}</p></div>`;
+      const src = selectedTech === 'react' ? 'react_web/index.html' : 'angular_web/browser/index.html';
+      const title = selectedTech === 'react' ? 'React Portfolio' : 'Angular Portfolio';
+      mc.innerHTML = `
+        <section class="hero container reveal">
+          <p class="eyebrow">${selectedTech === 'react' ? 'React Build' : 'Angular Build'}</p>
+          <h1>${title}</h1>
+          <p class="intro">
+            This version opens as a full page for a cleaner experience.
+            The embedded mini-site preview has been removed.
+          </p>
+          <div class="hero-actions">
+            <a class="button primary" href="${src}">Open Full Page</a>
+            <a class="button ghost" href="${src}" target="_blank" rel="noreferrer">Open In New Tab</a>
+          </div>
+        </section>
+      `;
+      setupRevealAnimations();
     }
   });
 });
