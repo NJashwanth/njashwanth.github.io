@@ -12,6 +12,37 @@
     />
     <script type="module" crossorigin src="./assets/index-b709005b.js"></script>
     <link rel="stylesheet" href="./assets/index-972ed6ff.css">
+    <style>
+      body {
+        display: block !important;
+        place-items: initial !important;
+        min-width: 0 !important;
+      }
+    </style>
+    <script>
+      (function () {
+        function applyTheme(theme) {
+          var nextTheme = theme === 'dark' ? 'dark' : 'light';
+          document.documentElement.setAttribute('data-theme', nextTheme);
+          document.body.setAttribute('data-theme', nextTheme);
+        }
+
+        window.addEventListener('message', function (e) {
+          if (typeof e.data === 'string' && e.data.indexOf('theme:') === 0) {
+            applyTheme(e.data.slice(6));
+          }
+        });
+
+        try {
+          if (window.parent && window.parent !== window && window.parent.document) {
+            var parentTheme = window.parent.document.body.getAttribute('data-theme');
+            applyTheme(parentTheme || 'light');
+          }
+        } catch (_err) {
+          applyTheme('light');
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

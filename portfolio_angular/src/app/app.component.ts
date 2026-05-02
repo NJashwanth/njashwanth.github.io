@@ -25,6 +25,13 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
   theme = 'light';
   year = new Date().getFullYear();
 
+  private applyTheme(theme: string) {
+    const nextTheme = theme === 'dark' ? 'dark' : 'light';
+    this.theme = nextTheme;
+    document.documentElement.setAttribute('data-theme', nextTheme);
+    document.body.setAttribute('data-theme', nextTheme);
+  }
+
   experiences: Experience[] = [
     {
       title: 'Software Engineer II - Apps',
@@ -124,13 +131,14 @@ export class AppComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private messageHandler = (e: MessageEvent) => {
     if (typeof e.data === 'string' && e.data.startsWith('theme:')) {
-      this.theme = e.data.replace('theme:', '');
+      this.applyTheme(e.data.replace('theme:', ''));
     }
   };
 
   private revealObserver!: IntersectionObserver;
 
   ngOnInit() {
+    this.applyTheme(this.theme);
     window.addEventListener('message', this.messageHandler);
   }
 

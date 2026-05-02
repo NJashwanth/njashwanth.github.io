@@ -149,6 +149,12 @@ export default function App() {
   const [theme, setTheme] = useState('light')
 
   useEffect(() => {
+    const nextTheme = theme === 'dark' ? 'dark' : 'light'
+    document.documentElement.setAttribute('data-theme', nextTheme)
+    document.body.setAttribute('data-theme', nextTheme)
+  }, [theme])
+
+  useEffect(() => {
     const handler = (e) => {
       if (typeof e.data === 'string' && e.data.startsWith('theme:')) {
         setTheme(e.data.replace('theme:', ''))

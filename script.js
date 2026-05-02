@@ -111,7 +111,7 @@ techTabs.forEach((tab) => {
       return;
     }
 
-    // Embed React or Angular via iframe
+    // React and Angular are better viewed full-page instead of nested in an iframe.
     techStatus.textContent = '';
     techStatus.hidden = true;
     const mc = document.getElementById('main-content');
@@ -120,14 +120,22 @@ techTabs.forEach((tab) => {
         mc.dataset.originalHtml = mc.innerHTML;
       }
       const src = selectedTech === 'react' ? 'react_web/index.html' : 'angular_web/browser/index.html';
-      mc.innerHTML = `<div class="container section tech-placeholder" style="min-height:60vh;display:flex;align-items:center;justify-content:center;"><iframe src="${src}" style="width:100%;height:70vh;border:none;box-shadow:0 2px 16px #0001;border-radius:12px;background:transparent;"></iframe></div>`;
-      const iframe = mc.querySelector('iframe');
-      if (iframe) {
-        iframe.addEventListener('load', () => {
-          const theme = document.body.getAttribute('data-theme') || 'light';
-          iframe.contentWindow.postMessage('theme:' + theme, '*');
-        });
-      }
+      const title = selectedTech === 'react' ? 'React Portfolio' : 'Angular Portfolio';
+      mc.innerHTML = `
+        <section class="hero container reveal">
+          <p class="eyebrow">${selectedTech === 'react' ? 'React Build' : 'Angular Build'}</p>
+          <h1>${title}</h1>
+          <p class="intro">
+            This version opens as a full page for a cleaner experience.
+            The embedded mini-site preview has been removed.
+          </p>
+          <div class="hero-actions">
+            <a class="button primary" href="${src}">Open Full Page</a>
+            <a class="button ghost" href="${src}" target="_blank" rel="noreferrer">Open In New Tab</a>
+          </div>
+        </section>
+      `;
+      setupRevealAnimations();
     }
   });
 });
