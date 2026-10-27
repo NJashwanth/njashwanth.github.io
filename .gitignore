@@ -14,3 +14,7 @@ dist/
 
 # claude
 .claude/
+
+# design tooling output
+.taste-skill/
+.playwright-cli/
