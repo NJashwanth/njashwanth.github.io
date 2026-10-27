@@ -1,8 +1,9 @@
 import { copyFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { defineConfig, type Plugin } from 'vite';
-import react from '@vitejs/plugin-react';
+import { defineConfig, type Plugin, type ViteDevServer } from 'vite';
 import { links, person, site } from './src/content.ts';
+import { renderPage, type Stats } from './src/render.ts';
+import stats from './src/data/stats.json' with { type: 'json' };
 
 // Keep the root CNAME as the single source of truth and ship it with the
 // client build so GitHub Pages keeps serving jneela.dev.
@@ -12,15 +13,15 @@ function copyCname(): Plugin {
     apply: 'build',
     writeBundle(options) {
       const src = resolve(import.meta.dirname, 'CNAME');
-      if (options.dir?.endsWith('dist') && existsSync(src)) {
-        copyFileSync(src, resolve(options.dir, 'CNAME'));
-      }
+      if (options.dir && existsSync(src)) copyFileSync(src, resolve(options.dir, 'CNAME'));
     },
   };
 }
 
-// Fill %TOKENS% in index.html from content.ts so SEO copy lives with the rest.
-function headFromContent(): Plugin {
+// Fill %TOKENS% in index.html from content.ts and render the page into
+// <!--app-html-->. In dev the renderer is reloaded per request so content
+// edits show without a restart.
+function staticPage(): Plugin {
   const escape = (s: string) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
   const tokens: Record<string, string> = {
     SITE_TITLE: site.title,
@@ -31,28 +32,33 @@ function headFromContent(): Plugin {
     LINK_GITHUB: links.github,
     LINK_LINKEDIN: links.linkedin,
   };
+  let server: ViteDevServer | undefined;
   return {
-    name: 'head-from-content',
-    transformIndexHtml: (html) => html.replace(/%([A-Z_]+)%/g, (m, key: string) => (key in tokens ? escape(tokens[key]) : m)),
+    name: 'static-page',
+    configureServer(s) {
+      server = s;
+    },
+    async transformIndexHtml(html) {
+      let render = renderPage;
+      let data = stats as Stats;
+      if (server) {
+        render = (await server.ssrLoadModule('/src/render.ts')).renderPage;
+        data = (await server.ssrLoadModule('/src/data/stats.json')).default;
+      }
+      return html
+        .replace(/%([A-Z_]+)%/g, (m, key: string) => (key in tokens ? escape(tokens[key]) : m))
+        .replace('<!--app-html-->', () => render(data));
+    },
   };
 }
 
 export default defineConfig({
-  plugins: [react(), copyCname(), headFromContent()],
-  ssr: { noExternal: true },
+  plugins: [copyCname(), staticPage()],
   build: {
     target: 'es2022',
     cssCodeSplit: false,
-    rolldownOptions: {
-      output: {
-        // three, @react-three/fiber and @react-three/drei ship as one named,
-        // lazily-loaded chunk ("three-[hash].js"), fetched only with the hero's 3D stack.
-        codeSplitting: {
-          // Keep shared deps (React) out of the group, or it gets preloaded on every page.
-          includeDependenciesRecursively: false,
-          groups: [{ name: 'three', test: /node_modules[\\/](three|@react-three)[\\/]/ }],
-        },
-      },
-    },
+    assetsInlineLimit: 0,
+    // Only the lazily loaded 3D chunk (three.js) is this large.
+    chunkSizeWarningLimit: 600,
   },
 });

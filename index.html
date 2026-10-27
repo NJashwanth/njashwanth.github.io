@@ -7,9 +7,9 @@
     <meta name="description" content="%SITE_DESCRIPTION%" />
     <meta name="author" content="%PERSON_NAME%" />
     <link rel="canonical" href="%SITE_URL%/" />
-    <meta name="color-scheme" content="dark light" />
-    <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)" />
-    <meta name="theme-color" content="#f6f7f9" media="(prefers-color-scheme: light)" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#EDE8E0" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#171411" media="(prefers-color-scheme: dark)" />
 
     <meta property="og:type" content="website" />
     <meta property="og:url" content="%SITE_URL%/" />
@@ -30,23 +30,21 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
     <script>
-      // Runs before first paint: apply the saved theme, and resolve the motion
-      // setting (URL ?motion=full|reduced, then localStorage, then the OS) the
-      // same way src/lib/motion.ts does, so CSS and JS agree from frame one.
+      // Before first paint: mark JS as available and apply a saved theme so
+      // there is no flash.
       (function () {
         var d = document.documentElement;
-        var m = null;
+        d.classList.add('js');
         try {
           var t = localStorage.getItem('theme');
           if (t === 'light' || t === 'dark') d.dataset.theme = t;
-          var p = new URLSearchParams(location.search).get('motion');
-          if (p === 'full' || p === 'reduced') localStorage.setItem('motion', (m = p));
-          else {
-            var s = localStorage.getItem('motion');
-            if (s === 'full' || s === 'reduced') m = s;
-          }
         } catch (e) {}
-        d.dataset.motion = m || (matchMedia('(prefers-reduced-motion: reduce)').matches ? 'reduced' : 'full');
+        // Desktop with motion: hold the hero name until StringSplit has split it,
+        // and never longer than 1.6s if the runtime is slow or fails.
+        if (matchMedia('(min-width: 64rem) and (pointer: fine) and (prefers-reduced-motion: no-preference)').matches) {
+          d.classList.add('st-intro');
+          setTimeout(function () { d.classList.remove('st-intro'); }, 1600);
+        }
       })();
     </script>
     <script type="application/ld+json">
@@ -62,7 +60,7 @@
     </script>
   </head>
   <body>
-    <div id="root"><!--app-html--></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <!--app-html-->
+    <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
